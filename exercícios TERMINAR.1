@@ -72,58 +72,38 @@ min(Dados_c3$children, na.rm = TRUE)
 #Média de crianças
 mean(Dados_c3$children, na.rm = TRUE)
 
-# C6 -> 1 qts 
-
-dados_c6  <- countymurders
+#questão 6 (i)
+dados_c4 <- countymurders
 ?countymurders
+ano_de_1996 <- dados_c4 %>% filter(year == 1996)
+# sem assassinato
+ZEROMURDERS <- ano_de_1996 %>% filter(murders ==0)
+#sem execução
+ZEROEXECS   <- ano_de_1996%>% filter(execs ==0)
+2197-2166
+#Porcentagem de condados sem execução
+table(ano_de_1996$execs)/nrow(ano_de_1996)*100
 
-# NÚMERO DE CONDADOS
-nrow(dados_c6)
+#questão 6 (ii)
+max(ano_de_1996$murders, na.rm = TRUE) #MAX ASSASSINATOS
+max(ano_de_1996$execs, na.rm = TRUE)#MAX EXECUÇÕES
+mean(ano_de_1996$execs, na.rm = TRUE)#Média EXECUÇÕES
 
-#Zero ass (1996)
-'table(dados_c6$murders != 0 & dados_c6$year==1996)'
-dados_hom = dados_c6 %>% filter(murders != 0)   # Filtrando
-table(dados_hom$year == 1996)                   # Mostrando o resultado
-dd2 = dados_hom %>% filter(year == 1996)        # Ampliando o filtro
-dd3 = table(dd2$year)                           # Mostrando o resultado
-paste("# Dados resultado = ", dd3, sep = ' ')   # Personalizando
+cor(ano_de_1996$murders, ano_de_1996$execs)#coeficiente de correlação
 
+#questão 7 (i)
+dados_c5 <- alcohol
+?alcohol
+table(dados_c5$abuse)/nrow(dados_c5)*100 #taxa de abuso do alcool
+table(dados_c5$employ)/nrow(dados_c5)*100 #taxa de emprego
+#questão 7 (ii)
+abusam_do_alcool <- dados_c5%>% filter(abuse == 1)
+table(abusam_do_alcool$employ)/nrow(abusam_do_alcool)*100 #taxa de emprego dos que abusam do alcool
 
-# Forma encontrada que deu certo
-dados_hom_not <- dados_c6 %>% filter(year == 1996, murders == 0)  # Filtrar por não assasinatos.
-contagem <- dados_hom_not %>%                       # Contar a quantidade de não assasinatos.
-  summarise(contagem = sum(murders == 0))
-contagem                                            # Mostrar o resultado.
+#questão 7 (iii)
 
-porcent = contagem / nrow(dados_c6)                 # Calcular a porcentagem.
-porcent                                             # Mostrar a porcentagem.
-
-
-#c6 -> 2
-max(dados_c6$murders)                               # Mostrar o valor máximo de uma coluna.
-
-max(dados_c6$execs)
-
-porcent_exec = max(dados_c6$execs)  / max(dados_c6$murders)
-porcent_exec
-
-
-# C6 -> 3Coeficinete de correlação
-cor.test(countymurders$murders, countymurders$execs)
-
-#C7-1
-dados_c7 <- alcohol
-table(dados_c7$abuse>0)/nrow(dados_c7)
-
-#C7-2
-dados_Abuse <- dados_c7%>% filter(abuse==1)
-table(dados_Abuse$status==3)
-
-#C7-3
-dados_Abuse <- dados_c7%>% filter(abuse==0)
-table(dados_Abuse$status==3)
-
-
+nao_abusam_do_alcool <- dados_c5%>% filter(abuse == 0)
+table(nao_abusam_do_alcool$employ)/nrow(nao_abusam_do_alcool)*100 #taxa de emprego dos que não abusam do alcool
 
 
 
