@@ -1,0 +1,103 @@
+dados_carros <- mtcars
+
+# letra a)
+
+
+ggplot(data = dados_carros, aes(x = hp, y = mpg))+
+  geom_point(size = 4) +     # diagrama de dispersão
+  theme_classic() + 
+  xlab("Cavalos de potência") +    
+  ylab("milhas por galão") +    
+  geom_smooth(method = "lm", se = FALSE)
+
+# Letra B
+cor(dados_carros$hp, dados_carros$mpg)
+
+# Letra C
+dados_carros1 <- lm(formula = mpg ~ hp, data = mtcars) # Y ~ X 
+summary(dados_carros1)
+# Letra F
+plot(dados_carros1)
+
+# Letra G
+
+novo_dados_cars0 <- data.frame(hp = 200) 
+predict(dados_carros1, novo_dado_cars0) 
+
+##############################################################################
+##########################
+## Tabela de Distância  ##
+##########################
+# install.packages("ggplot2")
+# Pacotes
+library(ggplot2)
+
+ggplot(data = distancia, aes(x = idade, y = distancia)) +
+  geom_point(size = 4) +
+  theme_classic() + 
+  xlab("Idade") +
+  ylab("Distância (m)") + 
+  geom_smooth(method = "lm", se = FALSE)
+
+# Coeficiente de correlação linear
+cor(distancia$idade, distancia$distancia)
+# Resposta: -0.8012447
+
+#Ajuste do modelo de regressão 
+modelo_1 <- lm(formula = distancia ~ idade, data = distancia)
+
+# Mostra resultados do modelo      
+summary(modelo_1)
+  
+Coefficients:
+  Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 192.2273     7.8236  24.570  < 2e-16 ***
+  idade        -1.0023     0.1414  -7.086 1.04e-07 ***
+
+# intervalo de confiança para os parâmetros
+
+confint(modelo_1)
+
+# Predição para um novo valor 
+
+novo_dado <- data.frame(idade = 24) # Para 24 anos a pessoa vê 168.1726 metros de acordo com o modelo
+predict(modelo_1, novo_dado) 
+
+# Análise de resíduos
+
+plot(modelo_1)
+
+# se a linha tiver pareecendo uma reta constante, entãoomodelo é confiável
+# ele tem homocedasticidade
+
+plot(distancia$idade, rstandard(modelo_1), xlab = "idade", ylab = "Resíduos")
+abline(0,0)
+
+#################################################################################################
+
+dados_Boston <- MASS::Boston
+
+
+?MASS::Boston
+
+ggplot(data = dados_Boston, aes(x = rm, y = medv))+
+  geom_point() + #diagramadde dispersão
+  theme_classic() + 
+  xlab("Número de Quartos") + # 'Número de Quartos' no eixo X
+  ylab("Valor de venda (milhares de Dólares)") + # 'Valor de venda (milhares de Dólares)' eixo y
+  geom_smooth(method = "lm", se = FALSE)
+
+# Coeficiente de correlação linear para rm e medv
+
+cor(dados_Boston$rm, dados_Boston$medv)
+# Resultado 0.6953599 
+
+
+#Matrizde correlações 
+
+cor(dados_Boston)
+
+M <- cor(dados_Boston)
+corrplot(M, method = "number")
+
+
