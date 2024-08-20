@@ -1,0 +1,45 @@
+#######################
+# Pacotes
+
+install.packages("ggplot2")
+library(ggplot2)
+
+###########################
+#Diagrama de dispersão
+
+ggplot(data = poluicao, x = dia, y = CO) +
+  geom_point(size = 4) +
+  xlab("Dia") + 
+  ylab("Concentração de CO2") +
+  theme_classic() +
+  geom_smooth(method = "lm", se = FALSE)
+
+
+# Coeficiente de correlação
+
+cor(poluicao$dia, poluicao$CO)
+
+
+# Ajute de modelo
+
+modelo_poluicao <- lm(formula = CO ~ dia, data = poluicao)
+summary(modelo_poluicao)
+
+
+# R^2 = 19,96%
+
+################
+# Análise dos resíduos
+
+plot(poluicao$dia, modelo_poluicao$residuals)
+abline(0,0)
+
+# Omodelo tem desempenho bastante varido para diferentes valores de x,
+# epecialmente muito baixosou muito altos. parecem desobedecer o coeficiente de 
+# de homoceadticidade
+
+#Prredição para dia 121
+
+novo_dado <- data.frame(dia = 121)
+
+predict(modelo_poluicao, novo_dado,interval = "predict")
