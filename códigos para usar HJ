@@ -8,7 +8,7 @@ library(ggplot2)
 ###########################
 #Diagrama de dispersão
 
-ggplot(data = poluicao, x = dia, y = CO) +
+ggplot(data = poluicao, aes(x = dia, y = CO)) +
   geom_point(size = 4) +
   xlab("Dia") + 
   ylab("Concentração de CO2") +
@@ -50,7 +50,7 @@ predict(modelo_poluicao, novo_dado,interval = "predict")
 ###########################
 #Diagrama de dispersão
 
-ggplot(data = vento, x = t, y = vt) +
+ggplot(data = vento, aes(x = t, y = vt)) +
   geom_point(size = 4) +
   xlab("Dia") + 
   ylab("Velocidade do vento") +
