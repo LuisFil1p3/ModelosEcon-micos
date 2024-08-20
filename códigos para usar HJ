@@ -1,3 +1,4 @@
+#POLUIÇÃO
 #######################
 # Pacotes
 
@@ -43,3 +44,49 @@ abline(0,0)
 novo_dado <- data.frame(dia = 121)
 
 predict(modelo_poluicao, novo_dado,interval = "predict")
+
+####################################################################
+#VENTO
+###########################
+#Diagrama de dispersão
+
+ggplot(data = vento, x = t, y = vt) +
+  geom_point(size = 4) +
+  xlab("Dia") + 
+  ylab("Velocidade do vento") +
+  theme_classic() +
+  geom_smooth(method = "lm", se = FALSE)
+
+
+# Coeficiente de correlação
+
+cor(vento$t, vento$vt)
+
+
+# Ajute de modelo
+
+modelo_vento <- lm(formula = vt ~ t, data = vento)
+summary(modelo_vento)
+
+
+#
+
+################
+# Análise dos resíduos
+
+plot(poluicao$dia, modelo_poluicao$residuals)
+abline(0,0)
+
+#pontos discrepantes
+
+plot(modelo_vento)
+
+# Anpalise da Normalidade dos resíduos
+
+qqnorm(modelo_vento$residuals)
+abline(0,0)
+
+# Ajuste do modelo
+
+modelo_vento <- lm(formula = vt ~ t, data = vento)
+summary(modelo_vento)
