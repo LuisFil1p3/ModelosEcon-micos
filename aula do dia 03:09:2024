@@ -1,0 +1,85 @@
+#pacotes 
+installed.packages("kmed")
+library(kmed)
+library(dplyr)
+install.packages("sjplot")
+library(sjplot)
+library(ggplot2)
+
+
+# Importando Dataset
+Dados <- heart
+
+#Dados novos 
+
+# 1 selecionando coluna   
+
+dados_novos <- Dados %>% select(age, sex, cp, thalach, class)
+
+# Renomeando colunas
+
+dados_novos <- dados_novos %>% rename(idade = age, sexo = sex, dor_no_peito = cp, frequencia_max = thalach, doenca_cardiaca = class)
+  
+# Renomeando valores para a variável sexo
+
+dados_novos$sexo <- factor(dados_novos$sexo, levels = c(FALSE, TRUE), labels = c("feminino", "masculino")) 
+
+# Renomear valores para dor no peito
+
+dados_novos$dor_no_peito <- factor(dados_novos$dor_no_peito,
+                                   levels = 1:4,
+                                   labels = c("angina típica", "angina atípica", "dor não-anginal","assintomático"))
+
+# codificando paradoente e não doente
+
+dados_novos$doenca_cardiaca <- ifelse(dados_novos$doenca_cardiaca == 0, 0, 1)
+
+
+#Passando para fator 
+
+dados_novos$doenca_cardiaca <- factor(dados_novos$doenca_cardiaca, 
+                                      levels = c(0, 1),
+                                      labels = c("sem doença", "com doença"))
+
+
+##################################################################################
+# 2 - Modelo 1 - Regressão Logística Simples - Variável independente quantitativa 
+##################################################################################
+
+ggplot(data = dados_novos, aes(y = idade, fill = doenca_cardiaca)) + 
+        geom_boxplot()
+
+
+dados_novos %>% group_by(doenca_cardiaca) %>% summarise(media = mean(idade))
+
+modelo_1 <- glm(doenca_cardiaca ~ idade, data =  dados_novos, family = 'binomial')
+
+summary(modelo_1)
+
+# Quando o coeficiente é igual a 0, x e y são independentes
+# Quando o coefficiente é > 0, a aprobabilidade de y = 1 (doente) aumenta com x
+# Quando o coefficiente é < 0, a aprobabilidade de y = 1 (doente) diminui com x
+ 
+# Quantiicanddo a relação 
+
+exp(coef(modelo_1)['idade'])
+
+# um ano extra de vida aumenta a chance dde desenvolc=ver uma doença cardíaca 
+# por um fator de 1.05
+
+# Análide do intercepto
+
+exp(coef(modelo_1)[1])/(1 + exp(coef(modelo_1)[1]))
+
+#uma pessoa de 0 ano tem uma chance de desenvolver doença
+#cardíaca de 0,04
+
+# Predizendo a  probabilidade de ter doença
+
+novo_paciente <- data.frame(idade = 30)
+predict(modelo_1, novo_paciente, type = 'response')
+
+# Uma pesoa com 30 anos tem 18,79% de ter doença cardíaca
+
+plot_model(modelo_1, type = "pred", terms = "idade")
+
