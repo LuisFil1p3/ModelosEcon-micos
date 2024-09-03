@@ -120,3 +120,86 @@ plot_model(modelo_2, type = 'pred', terrms = 'sexo')
 modelo_3 <- glm(doenca_cardiaca ~., 
                 data = dados_novos, 
                 family = 'binomial')
+#######################
+# ExERCÍCIOS 
+a)
+zumbis$galoes_por_morador = zumbis$agua/zumbis$moradores
+
+
+zumbis$comida <- factor(zumbis$comida)
+
+zumbis$sexo <-factor(zumbis$sexo, levels = c(0, 1),
+                     labels = c("masculino", "Feminino"))
+
+zumbis$zumbi <-factor(zumbis$zumbi, levels = c(0, 1),
+                     labels = c("Humano", "Zumbi"))
+
+
+zumbis$comida <-factor(zumbis$comida, levels = c(0, 1),
+                      labels = c("Não", "Sim"))
+
+zumbis$medicamentos <-factor(zumbis$medicamentos, levels = c(0, 1),
+                      labels = c("Não", "Sim"))
+
+
+zumbis$ferramentas <-factor(zumbis$ferramentas, levels = c(0, 1),
+                             labels = c("Não", "Sim"))
+
+
+zumbis$primeiros_socorros <-factor(zumbis$primeiros_socorros, levels = c(0, 1),
+                             labels = c("Não", "Sim"))
+
+
+zumbis$sanitizacao <-factor(zumbis$sanitizacao, levels = c(0, 1),
+                             labels = c("Não", "Sim"))
+
+
+zumbis$roupas <-factor(zumbis$roupas, levels = c(0, 1),
+                             labels = c("Não", "Sim"))
+
+
+zumbis$documentos <-factor(zumbis$documentos, levels = c(0, 1),
+                             labels = c("Não", "Sim"))
+
+b)
+ggplot(data = zumbis , aes(x =galoes_por_morador , fill = zumbi)) + 
+  geom_boxplot()
+
+
+
+d)
+zumbis_2 <- glm(zumbi ~., 
+                data = zumbis, 
+                family = 'binomial') 
+summary(zumbis_2)
+
+ggplot(data = zumbis_2 , aes(x = idade, fill = zumbi)) + 
+  geom_bar()
+
+
+ggplot(data = zumbis_2 , aes(x = sexo, fill = zumbi)) + 
+  geom_bar()
+
+
+ggplot(data = zumbis_2 , aes(x = area_residencia, fill = zumbi)) + 
+  geom_bar()
+
+ggplot(data = zumbis_2 , aes(x = medicamento, fill = zumbi)) + 
+  geom_bar()
+
+
+ggplot(data = zumbis_2 , aes(x = ferramentas, fill = zumbi)) + 
+  geom_bar()
+
+ggplot(data = zumbis_2 , aes(x = sanitizacao, fill = zumbi)) + 
+  geom_bar()
+
+ggplot(data = zumbis_2 , aes(x = documentos, fill = zumbi)) + 
+  geom_bar()
+
+e)
+chisq.test(table(zumbis$zumbi,
+                 zumbis$comida))
+
+chisq.test(table(zumbis$zumbi,
+                 zumbis$roupas))
