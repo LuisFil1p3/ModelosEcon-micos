@@ -83,3 +83,40 @@ predict(modelo_1, novo_paciente, type = 'response')
 
 plot_model(modelo_1, type = "pred", terms = "idade")
 
+#############################################################################################
+# 3 - modelo 2 - Regressão logística simples- variável independente qualitativa
+#############################################################################################
+# Análise Gráfica
+ggplot(data = dados_novos, aes(x = sexo, fill = doenca_cardiaca)) +
+        geom_bar()
+
+# Teste qui-quadrado para independência
+
+chisq.test(table(dados_novos$doenca_cardiaca,
+                 dados_novos$sexo))
+
+# Valor p < 0,05. Podemos rejeitar a hipótese de independência
+# das variáveis e supor que elas sejam, associadas, com um nível de confiança de 95%
+
+
+
+modelo_2 <- glm(doenca_cardiaca ~ sexo, 
+                data = dados_novos, 
+                family = 'binomial')
+
+summary(modelo_2)
+
+exp(coef(modelo_2)['sexomasculino'])
+
+# uma pessoa do sexo masculino tem um  fator multiplicado por 3,574 de 
+# desenvolver uma doença cardíaca.
+
+plot_model(modelo_2, type = 'pred', terrms = 'sexo')
+
+####################################################################################
+# 4 - modelo 3 - várias variáveis
+###################################################################################
+
+modelo_3 <- glm(doenca_cardiaca ~., 
+                data = dados_novos, 
+                family = 'binomial')
