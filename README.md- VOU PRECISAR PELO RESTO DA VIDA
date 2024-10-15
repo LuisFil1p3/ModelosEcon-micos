@@ -1,0 +1,150 @@
+#############################################
+# Introdução - Previsão de Séries Temporais #
+#############################################
+# Pacotes
+##############################
+install.packages("dplyr")
+install.packages("forecast")
+install.packages("ggplot2")
+install.packages("lubridate")
+install.packages("Metrics")
+install.packages("tsibble")
+install.packages("tsibbledata")
+install.packages("TTR")
+install.packages("fpp2")
+##############################
+# carregar
+##############################
+library("dplyr")
+library("forecast")
+library("ggplot2")
+library("lubridate")
+library("Metrics")
+library("tsibble")
+library("tsibbledata")
+library("TTR")
+library("fpp2")
+################################################
+# Parte 1 - Carregamento e análise dos dados
+################################################
+
+vendas_cerveja <- ausbeer
+
+print(vendas_cerveja)
+
+# Gráfico de linha
+autoplot(vendas_cerveja)
+
+# Decomposição da série
+vendas_cerveja %>% decompose() %>% autoplot()
+
+
+################################################
+# Parte 2 - Métodos e modelos de previsão
+################################################
+# Divisão dos dados
+############################
+0.8*length(vendas_cerveja) # pegando manualmente
+174/4
+1956+43
+cerveja_treino <- window(vendas_cerveja, end = c(1999,4))
+cerveja_teste <- window(vendas_cerveja, start = c(2000,1))
+
+#####################
+# Previsor NAIVE 
+#####################
+prev_naive_teste <- naive(cerveja_teste)
+
+# vendo os valores previstos
+prev_naive_teste
+
+# Calculando o Erro
+mape(prev_naive_teste$fitted[2:42], cerveja_teste[2:42])*100
+
+# Gráfico:
+
+autoplot(prev_naive_teste)
+
+#########################
+# 2 - Previsor NAIVE Sazonal 
+#########################
+prev_snaive_teste <- snaive(cerveja_teste)
+
+prev_snaive_teste
+
+# Cálculo do erro
+
+mape(prev_snaive_teste$fitted[5:42], cerveja_teste[5:42])*100
+
+# Gráfico
+autoplot(prev_snaive_teste)
+
+##################################
+# 3 - Previsor de Médias Móveis 
+##################################
+# Escolha da janela (Escolher a janela de menor MAPE)
+janela <- 2 
+media_movel_treino <- SMA(cerveja_treino, janela)
+mape(cerveja_treino[janela:176], media_movel_treino[janela:176])*100
+
+# Previsões na amostra de teste
+prev_media_movel <- SMA(cerveja_teste, janela)
+
+# Erro
+mape(cerveja_teste[janela:42], prev_media_movel[janela:42])*100
+
+#########################################
+# 4 - Amortecimento exponencial simples #
+#########################################
+# treino (encontrando alfa)
+aes_treino <- ses(cerveja_treino)
+summary(aes_treino)
+
+alfa_aes <- 0.1562
+
+prev_aes_teste <- ses(cerveja_teste, alpha = alfa_aes)
+
+# Erro
+mape(prev_aes_teste$fitted, cerveja_teste)*100
+
+# Gráfico 
+autoplot(prev_aes_teste)
+
+#########################################
+# 5 - Método de Holt #
+#########################################
+# encontrar alfa e beta
+holt_treino <- holt(cerveja_treino)
+summary(holt_treino)
+
+alfa_holt <- 0.0643
+beta_holt <- 0.0249
+
+# previsões na amostra de teste
+prev_holt_teste <- holt(cerveja_teste, alpha = alfa_holt, beta = beta_holt)
+
+# Erro
+mape(prev_holt_teste$fitted, cerveja_teste)*100
+
+autoplot(prev_holt_teste)
+
+#########################################################
+# 6 - Método de Holt-Winters (tendência e sazonalidade) #
+#########################################################
+hw_treino <- hw(cerveja_treino)
+summary(hw_treino)
+
+alfa_hw <- 0.2284
+beta_hw <- 0.0375
+gama_hw <- 0.2031
+
+prev_hw_teste <- hw(cerveja_teste, alpha = alfa_hw, beta = beta_hw, gamma = gama_hw)
+
+# Erro 
+mape(prev_hw_teste$fitted, cerveja_teste)*100
+
+# Gráfico 
+autoplot(prev_hw_teste)
+
+#vendo os números
+prev_hw_teste
