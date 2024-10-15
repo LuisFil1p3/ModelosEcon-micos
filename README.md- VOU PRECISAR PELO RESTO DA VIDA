@@ -148,3 +148,9 @@ autoplot(prev_hw_teste)
 
 #vendo os números
 prev_hw_teste
+########################################################################################################
+# Quando for trazer arquivos externos (fazer isso!!)
+
+passageiros <- ts(airline$Passageiros, frequency = 12, start = c(1949,1), end = c(1960,12))
+
+autoplot(passageiros)
