@@ -1,0 +1,26 @@
+# Fixando semente aleatória
+
+set.seed(1234)
+
+sorteio <- sample(1:362, 290) # Pessoas na amostra
+
+print(sorteio)
+
+#########################
+# KNN
+########################
+
+# Separando atributos e rótulos
+
+atributos <- Exercício_3_Dados_cancer2[,3:9] # características da coluna 3 até 9
+
+rotulos <- factor(Exercício_3_Dados_cancer2$Grupo)
+
+# Separando atributos e rótulos de treino
+
+atributos_treino <- atributos[sorteio,]
+rotulos_treino <- rotulos[-sorteio]
+
+atributos_teste <- atributos[-sorteio,]
+rotulos_teste <- rotulos[-sorteio]
+
