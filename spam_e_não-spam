@@ -63,7 +63,7 @@ sms_limpo <- tm_map(sms_limpo, stemDocument)
 ##############################
 # Parte 3 - Tokenização
 ###########################
-# Criando a matriz de termos dod documentos (dtm)
+# Criando a matriz de termos dos documentos (dtm)
 
 
 sms_dtm <- DocumentTermMatrix(sms_limpo)
