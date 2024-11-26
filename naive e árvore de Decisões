@@ -1,0 +1,96 @@
+#######################
+# Pacotes 
+#######################
+install.packages("caret")
+install.packages("class")
+install.packages("e1071")
+install.packages("MASS")
+install.packages("rattle")
+install.packages("rpart")
+
+library(caret)
+library(class)
+library(e1071)
+library(MASS)
+library(rattle)
+library(rpart)
+
+#########################################
+# 1 Preparaçãod dos dados
+#########################################
+# Remover a coluna ident
+
+Cancer2 <- Cancer2[-1]
+
+# Função de normalização dos dados
+
+minimax <- function(x) {
+  return((x - min(x))/(max(x)- min(x)))
+}
+
+# Separando os atributos normalizados 
+cancer2_atributos <- as.data.frame(lapply(Cancer2[2:8], minimax))
+
+# Separando os rótulos 
+
+Cancer2_rotulos <- factor(Cancer2$Grupo, levels = c("tem câncer","não tem câncer"))
+
+# Separando em treino e teste
+
+set.seed(1234)
+
+sorteio <- sample(1:362, 290) # 80% da amostra 0,8*362=289.6
+
+
+# Atributos
+cancer2_atributos_treino <- cancer2_atributos[sorteio,]
+cancer2_atributos_teste <- cancer2_atributos[-sorteio,]
+
+# Rótulos
+cancer2_rotulos_treino <- Cancer2_rotulos[sorteio]
+cancer2_rotulos_teste <- Cancer2_rotulos[-sorteio]
+
+##############
+# 2 - KNN
+###############
+
+set.seed(1234)
+
+knn_predicoes <- knn(train = cancer2_atributos_treino,
+                     test = cancer2_atributos_teste,
+                     cl = cancer2_rotulos_treino,
+                     k = 30)
+
+confusionMatrix(knn_predicoes, cancer2_rotulos_teste)
+
+
+####################
+# 3 - Naive Bayes
+####################
+
+set.seed(1234)
+
+naive_bayes <- naiveBayes(cancer2_atributos_treino, cancer2_rotulos_treino)
+naive_bayes_predicoes <- predict(naive_bayes, cancer2_atributos_teste)
+
+confusionMatrix(naive_bayes_predicoes, cancer2_rotulos_teste)
+
+
+#########################
+# 4 - Árvore de decisão
+#########################
+
+Cancer2$Grupo <- factor(Cancer2$Grupo, levels = c("tem câncer","não tem câncer"))
+
+Cancer2_treino <- Cancer2[sorteio,]
+
+Cancer2_teste_atributos <- Cancer2[-sorteio,2:8]
+Cancer2_teste_rotulos <- Cancer2$Grupo[-sorteio]
+
+arvore <- rpart(Grupo ~., Cancer2_treino, method = "class")
+
+arvore_predicoes <- predict(arvore, Cancer2_teste, type = "class")
+
+confusionMatrix(arvore_predicoes, Cancer2_teste_rotulos)
+
+varImp(arvore)
