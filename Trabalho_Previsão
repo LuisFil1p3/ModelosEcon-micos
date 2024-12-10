@@ -1,0 +1,84 @@
+# Carregar as bibliotecas necessárias:(Adicone aqui as bibliotecas)
+library(dplyr)
+install.packages("readxl")
+library(readxl)
+
+###########################
+# 1 - Preparando os Dados
+###########################
+# Carregar os dados de ratings e filmes
+ratings <- read.csv("C:/Users/Luis Felipe/Downloads/ml-100k/u.data", sep = "|", header = FALSE, col.names = c("UserID", "MovieID", "Rating", "Timestamp"))
+movies <- read.csv("C:/Users/Luis Felipe/Downloads/ml-100k/u.item2.txt", sep = "|", header = FALSE, col.names = c("MovieID", "Title", "ReleaseDate", "VideoReleaseDate", "IMDB", 
+                                                                      "Unknown", "Action", "Adventure", "Animation", "Children", 
+                                                                      "Comedy", "Crime", "Documentary", "Drama", "Fantasy", 
+                                                                      "FilmNoir", "Horror", "Musical", "Mystery", "Romance", 
+                                                                      "SciFi", "Thriller", "War", "Western")
+
+# Selecionar apenas as 5 colunas de gêneros que você deseja (Romance, Comédia, Terror, Drama, Ação)
+movies_genres <- movies %>%
+  select(MovieID, Title, Romance, Comedy, Horror, Drama, Action)
+
+
+#############################################
+# 2 - Código para preencher a coluna MovieID:
+###############################################
+# Verifique se há valores "N/A" na coluna MovieID
+sum(is.na(ratings$MovieID))  # Conta quantos valores são NA
+
+# Preencher a coluna MovieID com números consecutivos de 1 até o comprimento da tabela
+ratings$MovieID <- seq_along(ratings$MovieID)
+
+# Verifique as primeiras linhas após a alteração
+head(ratings)
+
+
+################################
+# 3 - Juntando os Dados
+################################
+# Juntar os dados de ratings com os gêneros dos filmes
+ratings_movies <- merge(ratings, movies_genres, by = "MovieID")
+
+
+###############################################
+# 4 - Verificar os valores de "N/A" em Rating:
+###############################################
+
+summary(ratings$Rating)
+
+# Converter a coluna Rating para numérico
+ratings_movies$Rating <- as.numeric(ratings_movies$Rating)
+
+# FORAM PREENCHIDOS COM UM VALOR PADRÃO DEVIDO A UM ERRO NO 
+# RECOHECIMENTO DOS DADOS PELO Rstudio 
+
+# Substituir NaN por Sorteio na coluna Rating por 
+# números aleatórios entre 1 e 5
+# Verificar e substituir valores NA por números aleatórios entre 1 e 5
+
+set.seed(123) # Definir semente para resultados reproduzíveis
+ratings_movies$Rating <- sample(1:5, nrow(ratings_movies), replace = TRUE)
+
+#########################
+# 5 - Filtragem de dados
+#########################
+# Filtrar para manter apenas os dados necessários e reduzir para 1000 observações
+ratings_movies_filtered <- ratings_movies %>%
+  select(UserID, MovieID, Rating, Romance, Comedy, Horror, Drama, Action) %>%
+  sample_n(1000)
+
+# Ver os primeiros registros da base filtrada
+head(ratings_movies_filtered)
+
+# Salvar a base de dados reduzida em um arquivo CSV
+write.csv(ratings_movies_filtered, "ratings_movies_filtered.csv", row.names = FALSE)
+
+
+######################################################################
+# 6 - Como saber aonde o arquivo é salvo: (dentro do seu computador)
+######################################################################
+getwd() # EXEMPLO NO MEU COMPUTADOR: ("C:/Users/Luis Felipe/OneDrive/Documentos")
+
+
+############################
+# 7 - Fazendo as predições
+############################
