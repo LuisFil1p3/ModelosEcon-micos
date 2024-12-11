@@ -1,0 +1,334 @@
+
+
+#renomeando as colunas
+colnames(ratings_movies_filtered)[1] ="ID_usuario"
+colnames(ratings_movies_filtered)[2] ="ID_filme"
+colnames(ratings_movies_filtered)[3] ="avaliacao"
+colnames(ratings_movies_filtered)[4] ="romance"
+colnames(ratings_movies_filtered)[5] ="comedia"
+colnames(ratings_movies_filtered)[6] ="horror"
+colnames(ratings_movies_filtered)[7] ="drama"
+colnames(ratings_movies_filtered)[8] ="acao"
+
+# Instalar pacotes
+install.packages("ggplot2")  
+install.packages("dplyr")  
+install.packages("tidyr")    #  manipulação de dados (separação de colunas, etc.)
+install.packages("recommenderlab")  #  sistemas de recomendação
+install.packages("recosystem")  # Para sistemas de recomendação com SVD
+install.packages("text")     # Para manipulação de texto e tradução
+install.packages("caret")
+install.packages("data.table")
+install.packages("class")
+install.packages("caret")
+install.packages("tidyr")
+install.packages("matrix")
+
+
+#renomeando o dataset
+filmes <- ratings_movies_filtered
+
+
+
+
+# Carregar pacotes
+library(ggplot2)
+library(dplyr)   
+library(tidyr)   
+library(recommenderlab)
+library(recosystem)  
+library(text)   
+library(caret)
+library(data.table)
+library(class)
+library(caret)
+library(tidyr)
+library(Matrix)
+
+
+
+
+#tabela dupla entrada de Avaliação
+table(filmes$avaliação)
+
+1   2   3   4   5 
+220 205 213 166 196 
+
+
+#tabela dupla entrada de Romance
+table(filmes$romance)
+0   1 
+849 151 
+
+#tabela dupla entrada de comédia
+table(filmes$comédia)
+
+0   1 
+713 287
+
+#tabela dupla entrada de horror
+table(filmes$horror)
+0   1 
+944  56 
+
+#tabela dupla entrada de drama
+table(filmes$drama)
+0   1 
+569 431 
+
+#tabela dupla entrada de ação
+table(filmes$ação)
+0   1 
+857 143
+
+
+
+
+
+
+
+
+
+#####################################################
+
+# Converte as avaliações para inteiros
+rating_matrix <- dados %>%
+  select(ID_usuario, ID_filme, avaliacao) %>%
+  pivot_wider(names_from = ID_filme, values_from = avaliacao, values_fill = list(avaliacao = 0)) %>%
+  mutate(across(everything(), as.integer)) # Converte para inteiros
+
+# Transformar a matriz em um objeto do tipo realRatingMatrix
+rating_matrix <- as(rating_matrix[, -1], "realRatingMatrix")
+
+
+
+
+
+
+######################################################
+
+# Instalar e carregar pacotes necessários
+if (!require("recommenderlab")) install.packages("recommenderlab", dependencies = TRUE)
+if (!require("dplyr")) install.packages("dplyr", dependencies = TRUE)
+
+library(recommenderlab)
+library(dplyr)
+library(matrix)
+
+# Leitura do arquivo CSV (substitua o caminho pelo nome correto do seu arquivo)
+# Vamos assumir que você tenha os dados no formato de data frame.
+dados <- filmes
+
+# Prepara a matriz de avaliações para o modelo de recomendação
+rating_matrix <- dados %>%
+  select(ID_usuario, ID_filme, avaliacao) %>%
+  pivot_wider(names_from = ID_filme, values_from = avaliacao, values_fill = list(avaliacao = 0))
+
+# Transformar a matriz em um objeto do tipo realRatingMatrix
+rating_matrix <- as(rating_matrix[, -1], "realRatingMatrix")
+
+# Criar um sistema de recomendação colaborativa com base no modelo User-Based Collaborative Filtering (UBCF)
+recommender <- Recommender(rating_matrix, method = "UBCF")
+
+# Gerar recomendações para todos os usuários
+recommendations <- predict(recommender, rating_matrix, n = 5) # Top 5 recomendações
+
+# Visualizar as recomendações para o primeiro usuário
+as(recommendations, "list")
+
+# Filtrar as recomendações com base em um gênero específico (por exemplo, "comédia")
+# Vamos criar uma lógica adicional que verifica os gêneros dos filmes recomendados
+filmes <- dados %>%
+  select(ID_filme, comedia, drama, romance, horror, acao) %>%
+  distinct()
+
+# Adiciona as informações dos gêneros aos filmes recomendados
+recom_comedia <- as(recommendations, "list") %>%
+  lapply(function(filmes_recomendados) {
+    filmes %>%
+      filter(ID_filme %in% filmes_recomendados, comedia == 1) # Filtra filmes de comédia
+  })
+
+# Exemplo: Visualizar recomendações de comédia para o primeiro usuário
+recom_comedia[[1]]
+
+
+
+
+
+####################################################
+
+# Carregar bibliotecas necessárias
+library(dplyr)
+library(recommenderlab)
+
+# Carregar o dataset
+dados <- read.csv(filmes)  # Alterar caminho conforme necessário
+
+# Criar a matriz de classificações (assumindo que o dataset tenha UserID e MovieID)
+matriz_classificacoes <- filmes %>%
+  select(ID_filme, avaliacao) %>%
+  spread(key = ID_filme, value = avaliacao, fill = NA)
+
+# Converter para uma matriz de recomendação
+matriz_recom <- as(matriz_classificacoes[,-1], "realRatingMatrix")
+
+# Treinar um modelo de filtragem colaborativa (usando a similaridade entre usuários)
+modelo <- Recommender(matriz_recom, method = "UBCF")  # "UBCF" = User-based Collaborative Filtering
+
+
+s <- sample(1:1000, 1000) 
+
+
+# Fazer recomendações para o usuário 1
+recomendacoes <- predict(modelo, matriz_recom[s], n = 5)
+
+# Mostrar as recomendações
+as(recomendacoes, "list")
+print(recomendacoes)
+
+
+
+
+
+
+
+
+##########################################
+
+dados <- filmes %>%
+  select(ID_usuario, ID_filme, avaliacao) %>%
+  pivot_wider(names_from = ID_filme, values_from = avaliacao, values_fill = list(avaliacao= NA))
+
+# Converter o data.frame para realRatingMatrix
+matriz_recom <- (data = dados[, -1])
+
+# Verificar o número total de usuários
+n_usuarios <- nrow(matriz_recom)
+print(n_usuarios)
+
+# Selecionar 1000 usuários aleatórios com reposição (se necessário)
+usuarios_aleatorios <- sample(1:n_usuarios, 1000, replace = TRUE)
+
+# Treinar o modelo de recomendação com filtragem colaborativa baseada em usuários
+modelo <- Recommender(matriz_recom, method = "UBCF")
+
+# Fazer recomendações para os 1000 usuários aleatórios
+recomendacoes <- predict(modelo, matriz_recom[usuarios_aleatorios], n = 5)
+
+# Exibir as recomendações em formato de lista
+recomendacoes_lista <- as(recomendacoes, "list")
+
+# Mostrar as recomendações para os 1000 usuários
+print(recomendacoes_lista)
+
+
+
+##############################################################################################################################################
+### ESSE É O NOSSO CÓDIGO!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#######################################################################
+### Teste (DEU CERTO)
+####################################################################
+library(dplyr)
+library(tidyr)
+library(recommenderlab)
+
+# Supondo que 'dados' seja o seu dataset com UserID, MovieID e Rating
+filmes2 <- filmes %>%
+  select(ID_usuario, ID_filme, avaliacao) %>%
+  pivot_wider(names_from = ID_filme, values_from = avaliacao, values_fill = list(avaliacao = NA))
+
+names(filmes)
+
+##########################
+# TESTE DENTRO DO TESTE
+#########################
+
+filmes2 <- filmes %>%
+  select(ID_usuario, ID_filme, avaliacao)  # Ajuste de acordo com os nomes das suas colunas
+
+# Organizar em formato de matriz de usuários x filmes
+filmes2 <- filmes %>%
+  pivot_wider(names_from = ID_filme, values_from = avaliacao, values_fill = list(avaliacao = NA))
+
+
+# Converter para realRatingMatrix
+matriz_recom <- as.matrix(filmes2[, -1])  # Remove a coluna ID_usuario
+
+# Verificar a conversão
+print(matriz_recom)
+
+# Converter a matriz para realRatingMatrix, necessário para o modelo
+matriz_recom_ratings <- as(matriz_recom, "realRatingMatrix")
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 2° Teste dentro do teste (DEU SUPEEERR CERTOOOO) 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Treinar o modelo de recomendação com filtragem colaborativa baseada em item (IBCF)
+modelo <- Recommender(matriz_recom_ratings, method = "IBCF")
+
+# Gerar recomendações para 1000 usuários aleatórios
+set.seed(43)  # Para garantir resultados reproduzíveis
+usuarios_aleatorios <- sample(1:nrow(matriz_recom_ratings), 1000)
+
+# Prever as recomendações para esses 1000 usuários
+recomendacoes <- predict(modelo, matriz_recom_ratings[usuarios_aleatorios], n = 5)
+
+# Mostrar as recomendações
+recomendacoes_lista <- as(recomendacoes, "list")
+
+# Exibir as recomendações
+print(recomendacoes_lista)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+##################################################################
+# Gerando gráfico para amostra de 15 usuários
+#################################################################
+
+# Mudado para 15 Usuários: DEVE RODAR DE DA LINHA 275 ATÉ 307
+usuarios_aleatorios <- sample(1:nrow(matriz_recom_ratings), 5)
+
+# Criar um data.frame com as predições e filmes recomendados
+recomendacoes_df <- data.frame(
+  Usuario = rep(usuarios_aleatorios, each = 5),
+  Filme = unlist(recomendacoes_lista),
+  Ranking = rep(1:5, times = length(usuarios_aleatorios)),
+  )
+
+# Criar o gráfico
+ggplot(recomendacoes_df, aes(x = factor(Usuario), y = Ranking, fill = Filme)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Recomendações de Filmes para 5 Usuários Aleatórios",
+       x = "Usuário",
+       y = "Ranking da Recomendação") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "Filme")
+
+
+###########################################################
+#
+
+
+Gênero correspondente ao ID do filme:
+1001 = comédia
+1008 = drama 
+1086 = drama
+1157 = horror
+1575 = drama
+1619 = drama
+193  = drama
+251  = comédia
+524  = comédia
+666  = horror
+675  = horror
+777  = horror
+816  = horror
+970  = comédia
+971  = comédia
+
+
+
+
+
